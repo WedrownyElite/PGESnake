@@ -14,10 +14,8 @@ public:
 	//Game variables
 	int score;
 	//Snake variables
-	float SnakeXPos, SnakeYPos, OldSnakeXPos, OldSnakeYPos;
+	float SnakeXPos, SnakeYPos;
 	int tailX[100], tailY[100], tailLength = 0;
-	//Tail Coordinates
-	float fposX, fposY, sposX, sposY;
 	float x, y;
 	//Target variables
 	int fruit1X, fruit1Y, fruit2X, fruit2Y;
@@ -65,23 +63,15 @@ public:
 		//Move Snake
 		switch (dir) {
 		case LEFT:
-			OldSnakeXPos = SnakeXPos + 2;
-			OldSnakeYPos = SnakeYPos;
 			SnakeXPos -= speed;
 			break;
 		case RIGHT:
-			OldSnakeXPos = SnakeXPos - 2;
-			OldSnakeYPos = SnakeYPos;
 			SnakeXPos += speed;
 			break;
 		case DOWN:
-			OldSnakeYPos = SnakeYPos - 2;
-			OldSnakeXPos = SnakeXPos;
 			SnakeYPos += speed;
 			break;
 		case UP:
-			OldSnakeYPos = SnakeYPos + 2;
-			OldSnakeXPos = SnakeXPos;
 			SnakeYPos -= speed;
 			break;
 		}
@@ -141,9 +131,6 @@ public:
 		olc::vi2d Fruit(fruit1X, fruit1Y);
 		olc::vu2d FruitSize(2, 2);
 
-		//Directions changes
-		userInput(speed);
-
 		//Snake and fruit collision
 		if (SnakeHead.x < Fruit.x + FruitSize.x &&
 			SnakeHead.x + SnakeHeadSize.x > Fruit.x &&
@@ -151,7 +138,7 @@ public:
 			SnakeHead.y + SnakeHeadSize.y > Fruit.y) {
 			fruit1 = false;
 			score++;
-			tailLength++;
+			tailLength+=10;
 		}
 
 		//Draw fruit
@@ -163,26 +150,26 @@ public:
 		//Border collision
 		BorderCollisionCheck();
 
-		//Tail
-		fposX = OldSnakeXPos;
-		fposY = OldSnakeYPos;
-		for (int i = 1; i <= tailLength; i++) {
-			sposX = tailX[i];
-			sposY = tailY[i];
-			tailX[i] = fposX;
-			tailY[i] = fposY;
-			fposX = sposX;
-			fposY = sposY;
+		//In order to create a tail following trail, start from the back-most tail and work your way up to the front, setting the previous tail's position to the current tail index's position.
+		for (int i = tailLength - 1; i > 0; i--) {
+			tailX[i]=tailX[i-1];
+			tailY[i]=tailY[i-1];
 		}
+		//Now set the front-most tail to the current snake head's position.
+		tailX[0]=SnakeXPos;
+		tailY[0]=SnakeYPos;
 
 		//Draw Snake tail
 		if (tailLength >= 1) {
-			for (int i = 1; i <= tailLength; i++) {
+			for (int i = 0; i < tailLength; i++) {
 				DrawRect(tailX[i], tailY[i], 1, 1, olc::GREEN);
 			}
 		}
 
-		//Draw Snake
+		//Snake position gets adjusted here.
+		userInput(speed);
+
+		//Draw the Snake at its new position.
 		DrawRect(SnakeXPos, SnakeYPos, 1, 1, olc::DARK_GREEN);
 
 		return true;
