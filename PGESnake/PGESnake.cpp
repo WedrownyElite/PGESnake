@@ -68,7 +68,7 @@ public:
 	}
 	void SnakeDead(float speed, int score) {
 		std::string scoreString = std::to_string(score);
-		if (GameOver == true) { 
+		if (GameOver == true) {
 			Clear(olc::BLACK);
 			DrawString(ScreenWidth() - ((ScreenWidth() / 2) + (ScreenWidth() / 2.8)), ScreenHeight() - 80, "Game Over", olc::RED, 1);
 			DrawString(ScreenWidth() - (ScreenWidth() / 2) - 20, ScreenHeight() - 60, "Score:", olc::GREEN, 1);
