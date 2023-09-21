@@ -22,31 +22,6 @@ public:
 	int fruit1X, fruit1Y, fruit2X, fruit2Y;
 	bool fruit1 = false, fruit2 = false;
 	bool GameOver;
-
-	void SnakeDead() {
-		if (GameOver == true) {
-			Clear(olc::BLACK);
-			DrawString(ScreenWidth() - ((ScreenWidth() / 2) + (ScreenWidth() / 2.8)), ScreenHeight() / 2 - 5, "Game Over", olc::RED, 1);
-		}
-	}
-	void BorderCollisionCheck() {
-		if (SnakeXPos <= 3) {
-			GameOver = true;
-			SnakeDead();
-		}
-		if (SnakeXPos >= ScreenWidth() - 3) {
-			GameOver = true;
-			SnakeDead();
-		}
-		if (SnakeYPos <= 3) {
-			GameOver = true;
-			SnakeDead();
-		}
-		if (SnakeYPos >= ScreenHeight() - 3) {
-			GameOver = true;
-			SnakeDead();
-		}
-	}
 	void userInput(float speed) {
 		if (GetKey(olc::Key::UP).bPressed && dir != DOWN) {
 			dir = UP;
@@ -75,6 +50,49 @@ public:
 		case UP:
 			SnakeYPos -= speed;
 			break;
+		}
+	}
+	void deadUserInput(float speed) {
+		if (GetKey(olc::Key::UP).bPressed && dir != DOWN) {
+			dir = STOP;
+		}
+		if (GetKey(olc::Key::DOWN).bPressed && dir != UP) {
+			dir = STOP;
+		}
+		if (GetKey(olc::Key::LEFT).bPressed && dir != RIGHT) {
+			dir = STOP;
+		}
+		if (GetKey(olc::Key::RIGHT).bPressed && dir != LEFT) {
+			dir = STOP;
+		}
+	}
+	void SnakeDead(float speed, int score) {
+		std::string scoreString = std::to_string(score);
+		if (GameOver == true) { 
+			Clear(olc::BLACK);
+			DrawString(ScreenWidth() - ((ScreenWidth() / 2) + (ScreenWidth() / 2.8)), ScreenHeight() - 80, "Game Over", olc::RED, 1);
+			DrawString(ScreenWidth() - (ScreenWidth() / 2) - 20, ScreenHeight() - 60, "Score:", olc::GREEN, 1);
+			DrawString(ScreenWidth() - (ScreenWidth() / 2), ScreenHeight() - 50, scoreString, olc::GREEN, 1);
+			DrawString(ScreenWidth() - (ScreenWidth() / 2) - 30, ScreenHeight() - 30, "Press Space to retry", olc::BLUE, 1);
+			deadUserInput(speed);
+		}
+	}
+	void BorderCollisionCheck(float speed, int score) {
+		if (SnakeXPos <= 3) {
+			GameOver = true;
+			SnakeDead(speed, score);
+		}
+		if (SnakeXPos >= ScreenWidth() - 3) {
+			GameOver = true;
+			SnakeDead(speed, score);
+		}
+		if (SnakeYPos <= 3) {
+			GameOver = true;
+			SnakeDead(speed, score);
+		}
+		if (SnakeYPos >= ScreenHeight() - 3) {
+			GameOver = true;
+			SnakeDead(speed, score);
 		}
 	}
 	void FruitCoordGen() {
@@ -109,7 +127,7 @@ public:
 			//fruit1Y = rand() & ScreenWidth();
 		//}
 	}
-	void TailCoord(float fElapsedTime) {
+	void TailCoord(float fElapsedTime, float speed) {
 		tailUpdateTimer -= fElapsedTime; //Decrement the tail timer by the game elapsed time.
 		if (tailUpdateTimer <= 0) {
 			//In order to create a tail following trail, start from the back-most tail and work your way up to the front, setting the previous tail's position to the current tail index's position.
@@ -121,6 +139,26 @@ public:
 			tailX[0] = SnakeXPos;
 			tailY[0] = SnakeYPos;
 			tailUpdateTimer = 0.05; //Every 0.05 seconds we will re-update the tail positions instead of doing it by frame-based timing.
+		}
+
+		//Draw Snake tail
+		if (tailLength >= 1) {
+			for (int i = 0; i < tailLength; i++) {
+				DrawRect(tailX[i], tailY[i], 1, 1, olc::GREEN);
+			}
+		}
+	}
+	void SnakeTailCollisionCheck(olc::vi2d SnakeHead, olc::vi2d SnakeHeadSize, int tailX[1000], int tailY[1000], float speed, int score) {
+		for (int i = 0; i <= tailLength; i++) {
+			olc::vi2d Tail(tailX[i], tailY[i]);
+			olc::vi2d TailSize(2, 2);
+
+			if (SnakeHead.x < Tail.x + TailSize.x &&
+				SnakeHead.x + SnakeHeadSize.x > Tail.x &&
+				SnakeHead.y < Tail.y + TailSize.y &&
+				SnakeHead.y + SnakeHeadSize.y > Tail.y) {
+				SnakeDead(speed, score);
+			}
 		}
 	}
 
@@ -153,7 +191,7 @@ public:
 			SnakeHead.y + SnakeHeadSize.y > Fruit.y) {
 			fruit1 = false;
 			score++;
-			tailLength += 2;
+			tailLength += 50;
 		}
 
 		//Draw fruit
@@ -163,22 +201,22 @@ public:
 		FruitCoordGen();
 
 		//Border collision
-		BorderCollisionCheck();
+		BorderCollisionCheck(speed, score);
 
-		TailCoord(fElapsedTime);
+		TailCoord(fElapsedTime, speed);
 
-		//Draw Snake tail
-		if (tailLength >= 1) {
-			for (int i = 0; i < tailLength; i++) {
-				DrawRect(tailX[i], tailY[i], 1, 1, olc::GREEN);
-			}
-		}
+		SnakeTailCollisionCheck(SnakeHead, SnakeHeadSize, tailX, tailY, speed, score);
 
 		//Snake position gets adjusted here.
-		userInput(speed);
+		if (GameOver == false) {
+			userInput(speed);
+		}
 
 		//Draw the Snake at its new position.
 		DrawRect(SnakeXPos, SnakeYPos, 1, 1, olc::DARK_GREEN);
+
+		//Hide the top left tail incorrectly drawn
+		DrawRect(0, 0, 1, 1, olc::BLACK);
 
 		return true;
 	}
