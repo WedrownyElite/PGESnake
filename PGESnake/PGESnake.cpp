@@ -29,7 +29,7 @@ public:
 			Clear(olc::BLACK);
 			DrawString(ScreenWidth() - ((ScreenWidth() / 2) + (ScreenWidth() / 2.8)), ScreenHeight() - 90, "Game Over", olc::RED, 1);
 			DrawString(ScreenWidth() / 2 - 20, ScreenHeight() - 70, "Score:", olc::GREEN, 1);
-			DrawString(ScreenWidth() / 2, ScreenHeight() - 60, scoreString, olc::GREEN, 1);
+			DrawString(ScreenWidth() / 2 - 2, ScreenHeight() - 60, scoreString, olc::GREEN, 1);
 			DrawString(ScreenWidth() - 100, ScreenHeight() - 40, "Press 'SPACE'", olc::BLUE, 1);
 			DrawString(ScreenWidth() / 2 - 30, ScreenHeight() - 30, "To Retry", olc::BLUE, 1);
 			dir = STOP;
@@ -148,6 +148,21 @@ public:
 			//fruit1Y = rand() & ScreenWidth();
 		//}
 	}
+	void SnakeTailCollision() {
+		olc::vi2d SnakeHead(SnakeXPos, SnakeYPos);
+		olc::vi2d SnakeHeadSize(2, 2);
+		for (int i = 4; i <= tailLength; i++) {
+			olc::vi2d SnakeTail(tailX[i], tailY[i]);
+			olc::vi2d SnakeTailSize(2, 2);
+			if (SnakeHead.x < SnakeTail.x + SnakeTailSize.x &&
+				SnakeHead.x + SnakeHeadSize.x > SnakeTail.x&&
+				SnakeHead.y < SnakeTail.y + SnakeTailSize.y &&
+				SnakeHead.y + SnakeHeadSize.y > SnakeTail.y) {
+				GameOver = true;
+				SnakeDead(score);
+				}
+		}
+	}
 
 private:
 
@@ -178,7 +193,7 @@ public:
 				SnakeHead.y + SnakeHeadSize.y > Fruit.y) {
 				fruit1 = false;
 				score++;
-				tailLength++;
+				tailLength+=2;
 			}
 
 			//Draw fruit
@@ -209,6 +224,8 @@ public:
 					DrawRect(tailX[i], tailY[i], 1, 1, olc::GREEN);
 				}
 			}
+
+			SnakeTailCollision();
 
 			//Snake position gets adjusted here.
 			userInput(speed);
