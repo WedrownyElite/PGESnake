@@ -23,6 +23,16 @@ public:
 	bool fruit1 = false, fruit2 = false;
 	bool GameOver;
 
+	void SnakeSpawn() {
+		srand(time(NULL));
+		//Coord gen
+		if (SnakeXPos <= 5 || SnakeXPos >= ScreenWidth() - 5) {
+			SnakeXPos = rand() & ScreenWidth() - 5;
+		}
+		if (SnakeYPos <= 5 || SnakeYPos >= ScreenHeight() - 5) {
+			SnakeYPos = rand() & ScreenHeight() - 5;
+		}
+	}
 	void SnakeDead(int score) {
 		if (GameOver == true) {
 			std::string scoreString = std::to_string(score);
@@ -54,22 +64,6 @@ public:
 			score = 0;
 			srand(time(NULL));
 			dir = STOP;
-			//Snake X coord gen
-			SnakeXPos = rand() & ScreenWidth();
-			if (SnakeXPos <= 3 || SnakeXPos >= ScreenWidth() - 3) {
-				SnakeXPos = rand() & ScreenWidth();
-			}
-			if (SnakeXPos <= 3 || SnakeXPos >= ScreenHeight() - 3) {
-				SnakeXPos = rand() & ScreenHeight();
-			}
-			//Snake Y coord gen
-			SnakeYPos = rand() & ScreenWidth();
-			if (SnakeYPos <= 3 || SnakeYPos >= ScreenWidth() - 3) {
-				SnakeYPos = rand() & ScreenWidth();
-			}
-			if (SnakeYPos <= 3 || SnakeYPos >= ScreenHeight() - 3) {
-				SnakeYPos = rand() & ScreenHeight();
-			}
 		}
 	}
 	void BorderCollisionCheck() {
@@ -169,6 +163,9 @@ private:
 public:
 	bool OnUserUpdate(float fElapsedTime) override {
 		if (GameOver == false) {
+
+			SnakeSpawn();
+
 			float speed = 20 * fElapsedTime;
 			Clear(olc::BLACK);
 			//Draw top border
@@ -243,24 +240,7 @@ public:
 	}
 
 	bool OnUserCreate() override {
-		srand(time(NULL));
 		dir = STOP;
-		//Snake X coord gen
-		SnakeXPos = rand() & ScreenWidth();
-		if (SnakeXPos <= 3 || SnakeXPos >= ScreenWidth() - 3) {
-			SnakeXPos = rand() & ScreenWidth();
-		}
-		if (SnakeXPos <= 3 || SnakeXPos >= ScreenHeight() - 3) {
-			SnakeXPos = rand() & ScreenHeight();
-		}
-		//Snake Y coord gen
-		SnakeYPos = rand() & ScreenWidth();
-		if (SnakeYPos <= 3 || SnakeYPos >= ScreenWidth() - 3) {
-			SnakeYPos = rand() & ScreenWidth();
-		}
-		if (SnakeYPos <= 3 || SnakeYPos >= ScreenHeight() - 3) {
-			SnakeYPos = rand() & ScreenHeight();
-		}
 		return true;
 	}
 };
