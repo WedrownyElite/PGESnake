@@ -10,9 +10,9 @@ public:
 	}
 
 	enum direction { STOP, LEFT, RIGHT, DOWN, UP };
-	direction dir;
+	direction dir = STOP;
 	//Game variables
-	int score;
+	int score = 0;
 	//Snake variables
 	float SnakeXPos, SnakeYPos;
 	float tailUpdateTimer = 0;
@@ -21,18 +21,8 @@ public:
 	//Target variables
 	int fruit1X, fruit1Y, fruit2X, fruit2Y;
 	bool fruit1 = false, fruit2 = false;
-	bool GameOver;
+	bool GameOver = false;
 
-	void SnakeSpawn() {
-		srand(time(NULL));
-		//Coord gen
-		if (SnakeXPos <= 5 || SnakeXPos >= ScreenWidth() - 5) {
-			SnakeXPos = rand() & ScreenWidth() - 5;
-		}
-		if (SnakeYPos <= 5 || SnakeYPos >= ScreenHeight() - 5) {
-			SnakeYPos = rand() & ScreenHeight() - 5;
-		}
-	}
 	void SnakeDead(int score) {
 		if (GameOver == true) {
 			std::string scoreString = std::to_string(score);
@@ -64,6 +54,9 @@ public:
 			score = 0;
 			srand(time(NULL));
 			dir = STOP;
+			srand(time(NULL));
+			SnakeXPos = rand() % ScreenWidth() - 5;
+			SnakeYPos = rand() % ScreenHeight() - 5;
 		}
 	}
 	void BorderCollisionCheck() {
@@ -164,8 +157,6 @@ public:
 	bool OnUserUpdate(float fElapsedTime) override {
 		if (GameOver == false) {
 
-			SnakeSpawn();
-
 			float speed = 20 * fElapsedTime;
 			Clear(olc::BLACK);
 			//Draw top border
@@ -222,6 +213,9 @@ public:
 				}
 			}
 
+			//Lil cheaty way to cover the top left tail squares when they first spawn heh
+			DrawRect(0, 0, 1, 1, olc::BLACK);
+
 			SnakeTailCollision();
 
 			//Snake position gets adjusted here.
@@ -240,6 +234,9 @@ public:
 	}
 
 	bool OnUserCreate() override {
+		srand(time(NULL));
+		SnakeXPos = rand() % ScreenWidth() - 5;
+		SnakeYPos = rand() % ScreenHeight() - 5;
 		dir = STOP;
 		return true;
 	}
