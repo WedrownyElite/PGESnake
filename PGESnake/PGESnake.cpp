@@ -244,7 +244,7 @@ public:
 
 int main() {
 	Snake demo;
-	if (demo.Construct(100, 100, 10, 10))
+	if (demo.Construct(100, 100, 10, 10, true))
 		demo.Start();
 	return 0;
 }
